@@ -6,6 +6,8 @@ const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+console.log(">>> SERVER FILE LOADED <<<");
+
 // Middleware
 // Enable CORS for development (React runs on 5173, Express on 3000)
 if (NODE_ENV === 'development') {
@@ -56,6 +58,13 @@ app.post('/api/validate', (req: express.Request, res: express.Response) => {
   return (res as any).status(200).json(response);
 });
 
+  app.get("/", (_req, res) => {
+  res.status(200).send("Backend is running. Use POST /api/validate");
+  });
+  app.get("/health", (_req, res) => {
+    res.status(200).json({ ok: true });
+  });
+
 // Production: Serve Frontend Static Files
 if (NODE_ENV === 'production') {
   // In Docker: server is at /app/dist/server.js, frontend is at /app/frontend/dist
@@ -67,12 +76,6 @@ if (NODE_ENV === 'production') {
   // SPA Fallback
   app.get('*', (req: express.Request, res: express.Response) => {
     (res as any).sendFile(path.join(staticPath, 'index.html'));
-  });
-  app.get("/", (_req, res) => {
-  res.status(200).send("Backend is running. Use POST /api/validate");
-  });
-  app.get("/health", (_req, res) => {
-    res.status(200).json({ ok: true });
   });
 
 }
