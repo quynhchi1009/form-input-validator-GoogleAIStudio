@@ -4,6 +4,8 @@ import React, { useState, useRef } from 'react';
 interface ValidationResponse {
   valid: boolean;
   reasons: string[];
+  wordCount: number;
+  letterCount: number;
 }
 
 const App: React.FC = () => {
@@ -143,6 +145,11 @@ const App: React.FC = () => {
                 </p>
               </div>
             )}
+            
+            <div className="mt-4 pt-3 border-t border-gray-300/50 space-y-1">
+              <p className="text-sm font-medium">Words: {result.wordCount}</p>
+              <p className="text-sm font-medium">Letters: {result.letterCount}</p>
+            </div>
           </div>
         )}
       </div>

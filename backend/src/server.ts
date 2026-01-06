@@ -6,8 +6,6 @@ const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-console.log(">>> SERVER FILE LOADED <<<");
-
 // Middleware
 // Enable CORS for development (React runs on 5173, Express on 3000)
 if (NODE_ENV === 'development') {
@@ -24,6 +22,8 @@ interface ValidationRequest {
 interface ValidationResponse {
   valid: boolean;
   reasons: string[];
+  wordCount: number;
+  letterCount: number;
 }
 
 // API Routes
@@ -37,6 +37,16 @@ app.post('/api/validate', (req: express.Request, res: express.Response) => {
 
   const input = body.value;
   const reasons: string[] = [];
+
+  // Compute Word Count
+  // Count words separated by one or more whitespace characters
+  // Handle empty string case to return 0 instead of 1 (split returns [""] for empty string)
+  const trimmedInput = input.trim();
+  const wordCount = trimmedInput.length === 0 ? 0 : trimmedInput.split(/\s+/).length;
+
+  // Compute Letter Count
+  // Count ONLY alphabetic characters (a–z, A–Z)
+  const letterCount = input.replace(/[^a-zA-Z]/g, '').length;
 
   // Rule 1: Length > 8
   if (input.length <= 8) {
@@ -52,18 +62,20 @@ app.post('/api/validate', (req: express.Request, res: express.Response) => {
 
   const response: ValidationResponse = {
     valid: isValid,
-    reasons: reasons
+    reasons: reasons,
+    wordCount: wordCount,
+    letterCount: letterCount
   };
 
   return (res as any).status(200).json(response);
-});
+  });
 
   app.get("/", (_req, res) => {
   res.status(200).send("Backend is running. Use POST /api/validate");
   });
   app.get("/health", (_req, res) => {
     res.status(200).json({ ok: true });
-  });
+});
 
 // Production: Serve Frontend Static Files
 if (NODE_ENV === 'production') {
@@ -77,7 +89,6 @@ if (NODE_ENV === 'production') {
   app.get('*', (req: express.Request, res: express.Response) => {
     (res as any).sendFile(path.join(staticPath, 'index.html'));
   });
-
 }
 
 // Start Server
